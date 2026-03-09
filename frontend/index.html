@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Generation System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <h1>📚 Book Generation System</h1>
+            <p>AI-Powered Book Creation with Human-in-the-Loop Review</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Step 1: Import Book -->
+        <section class="card" id="step-import">
+            <div class="card-header">
+                <span class="step-number">1</span>
+                <h2>Import Book</h2>
+                <span class="status-badge" id="import-status">Pending</span>
+            </div>
+            <div class="card-body">
+                <div class="upload-area" id="upload-area">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <p>Drop CSV file here or click to browse</p>
+                    <input type="file" id="file-input" accept=".csv" hidden>
+                    <button class="btn btn-primary" id="choose-file-btn">
+                        Choose File
+                    </button>
+                </div>
+                <div id="file-info" class="file-info" style="display: none;">
+                    <p><strong>File:</strong> <span id="file-name"></span></p>
+                    <button class="btn btn-success" id="upload-btn" onclick="uploadFile()">
+                        Upload & Import
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 2: Generate Outline -->
+        <section class="card" id="step-outline">
+            <div class="card-header">
+                <span class="step-number">2</span>
+                <h2>Generate Outline</h2>
+                <span class="status-badge" id="outline-status">Locked</span>
+            </div>
+            <div class="card-body">
+                <div id="outline-initial" class="initial-view">
+                    <p class="info-text">Import a book first to generate outline</p>
+                    <button class="btn btn-primary" id="generate-outline-btn" onclick="generateOutline()" disabled>
+                        🤖 Generate Outline with AI
+                    </button>
+                </div>
+                <div id="outline-content" class="content-view" style="display: none;">
+                    <div class="outline-text" id="outline-display"></div>
+                    <div class="review-section">
+                        <h3>Review Outline</h3>
+                        <textarea 
+                            id="outline-notes" 
+                            placeholder="Enter your feedback or leave empty to approve..."
+                            rows="4"
+                        ></textarea>
+                        <div class="review-actions">
+                            <button class="btn btn-success" onclick="approveOutline()">
+                                ✅ Approve & Continue
+                            </button>
+                            <button class="btn btn-warning" onclick="regenerateOutline()">
+                                🔄 Regenerate with Notes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 3: Generate Chapters -->
+        <section class="card" id="step-chapters">
+            <div class="card-header">
+                <span class="step-number">3</span>
+                <h2>Generate Chapters</h2>
+                <span class="status-badge" id="chapters-status">Locked</span>
+            </div>
+            <div class="card-body">
+                <div id="chapters-initial" class="initial-view">
+                    <p class="info-text">Complete outline first to generate chapters</p>
+                </div>
+                <div id="chapters-list" class="chapters-container" style="display: none;">
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 4: Compile Final Draft -->
+        <section class="card" id="step-final">
+            <div class="card-header">
+                <span class="step-number">4</span>
+                <h2>Final Draft</h2>
+                <span class="status-badge" id="final-status">Locked</span>
+            </div>
+            <div class="card-body">
+                <div id="final-initial" class="initial-view">
+                    <p class="info-text">Complete all chapters to compile final draft</p>
+                    <button class="btn btn-primary" id="compile-btn" onclick="compileFinalDraft()" disabled>
+                        📄 Compile Final Draft
+                    </button>
+                </div>
+                <div id="final-content" class="content-view" style="display: none;">
+                    <div class="success-message">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        <h3>Final Draft Ready!</h3>
+                        <p>Your book has been compiled successfully.</p>
+                    </div>
+                    <div class="review-section">
+                        <textarea 
+                            id="final-notes" 
+                            placeholder="Final review notes (optional)..."
+                            rows="3"
+                        ></textarea>
+                        <div class="review-actions">
+                            <button class="btn btn-success" onclick="downloadBook('docx')">
+                                📥 Download .docx
+                            </button>
+                            <button class="btn btn-success" onclick="downloadBook('pdf')" style="background: #e74c3c;">
+                                📥 Download .pdf
+                            </button>
+                            <button class="btn btn-success" onclick="downloadBook('txt')" style="background: #3498db;">
+                                📥 Download .txt
+                            </button>
+                            <button class="btn btn-secondary" onclick="submitFinalReview()">
+                                Submit Review
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Books List -->
+        <section class="card">
+            <div class="card-header">
+                <h2>📖 All Books</h2>
+                <button class="btn btn-secondary" onclick="loadBooks()">🔄 Refresh</button>
+            </div>
+            <div class="card-body">
+                <div id="books-list" class="books-list">
+                    <p class="info-text">Loading books...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p>Processing...</p>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
